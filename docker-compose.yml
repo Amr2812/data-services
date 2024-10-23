@@ -15,7 +15,7 @@ services:
       - MAX_HEAP_SIZE=512M
       - HEAP_NEWSIZE=100M
     networks:
-      - cassandra-network
+      - dataservices-network
     volumes:
       - cassandra_data1:/var/lib/cassandra
     healthcheck:
@@ -38,7 +38,7 @@ services:
       - MAX_HEAP_SIZE=512M
       - HEAP_NEWSIZE=100M
     networks:
-      - cassandra-network
+      - dataservices-network
     depends_on:
       cassandra-node1:
         condition: service_healthy
@@ -59,7 +59,7 @@ services:
       - MAX_HEAP_SIZE=512M
       - HEAP_NEWSIZE=100M
     networks:
-      - cassandra-network
+      - dataservices-network
     depends_on:
       cassandra-node1:
         condition: service_healthy
@@ -72,11 +72,26 @@ services:
       cassandra-node1:
         condition: service_healthy
     networks:
-      - cassandra-network
+      - dataservices-network
     volumes:
       - ./init.cql:/init.cql
     command: /bin/bash -c "cqlsh cassandra-node1 -f /init.cql"
     restart: on-failure
+
+  data-service1:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "50051:50051"
+    networks:
+      - dataservices-network
+    depends_on:
+      - cassandra-node1
+    environment:
+      - PORT=50051
+      - CASSANDRA_HOST=cassandra-node1
+    restart: always
 
 volumes:
   cassandra_data1:
@@ -84,5 +99,5 @@ volumes:
   cassandra_data3:
 
 networks:
-  cassandra-network:
+  dataservices-network:
     driver: bridge

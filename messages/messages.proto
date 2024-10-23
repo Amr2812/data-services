@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+option go_package = "github.com/Amr2812/data-services/messages";
+
+package messages;
+
+service MessagesService {
+    rpc getMessage (MessageRequest) returns (MessageReply);
+}
+
+message MessageRequest {
+    int64 channel_id = 1;
+    int64 message_id = 2;
+}
+
+message MessageReply {
+    int64 channel_id = 1;
+    int64 message_id = 2;
+    int64 author_id = 3;
+    string content = 4;
+}
