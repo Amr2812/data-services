@@ -1,0 +1,88 @@
+version: '3.8'
+
+services:
+  cassandra-node1:
+    image: cassandra:latest
+    container_name: cassandra-node1
+    hostname: cassandra-node1
+    restart: always
+    environment:
+      - CASSANDRA_BROADCAST_ADDRESS=cassandra-node1
+      - CASSANDRA_SEEDS=cassandra-node1
+      - CASSANDRA_CLUSTER_NAME=data_services
+      - CASSANDRA_DC=datacenter1
+      - CASSANDRA_RACK=rack1
+      - MAX_HEAP_SIZE=512M
+      - HEAP_NEWSIZE=100M
+    networks:
+      - cassandra-network
+    volumes:
+      - cassandra_data1:/var/lib/cassandra
+    healthcheck:
+      test: ["CMD-SHELL", "nodetool status | grep UN"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  cassandra-node2:
+    image: cassandra:latest
+    container_name: cassandra-node2
+    hostname: cassandra-node2
+    restart: always
+    environment:
+      - CASSANDRA_BROADCAST_ADDRESS=cassandra-node2
+      - CASSANDRA_SEEDS=cassandra-node1
+      - CASSANDRA_CLUSTER_NAME=data_services
+      - CASSANDRA_DC=datacenter1
+      - CASSANDRA_RACK=rack1
+      - MAX_HEAP_SIZE=512M
+      - HEAP_NEWSIZE=100M
+    networks:
+      - cassandra-network
+    depends_on:
+      cassandra-node1:
+        condition: service_healthy
+    volumes:
+      - cassandra_data2:/var/lib/cassandra
+
+  cassandra-node3:
+    image: cassandra:latest
+    container_name: cassandra-node3
+    hostname: cassandra-node3
+    restart: always
+    environment:
+      - CASSANDRA_BROADCAST_ADDRESS=cassandra-node3
+      - CASSANDRA_SEEDS=cassandra-node1
+      - CASSANDRA_CLUSTER_NAME=data_services
+      - CASSANDRA_DC=datacenter1
+      - CASSANDRA_RACK=rack1
+      - MAX_HEAP_SIZE=512M
+      - HEAP_NEWSIZE=100M
+    networks:
+      - cassandra-network
+    depends_on:
+      cassandra-node1:
+        condition: service_healthy
+    volumes:
+      - cassandra_data3:/var/lib/cassandra
+
+  cassandra-init:
+    image: cassandra:latest
+    depends_on:
+      cassandra-node1:
+        condition: service_healthy
+    networks:
+      - cassandra-network
+    volumes:
+      - ./init.cql:/init.cql
+    command: /bin/bash -c "cqlsh cassandra-node1 -f /init.cql"
+    restart: on-failure
+
+volumes:
+  cassandra_data1:
+  cassandra_data2:
+  cassandra_data3:
+
+networks:
+  cassandra-network:
+    driver: bridge
