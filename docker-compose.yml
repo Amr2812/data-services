@@ -12,6 +12,7 @@ services:
       - CASSANDRA_CLUSTER_NAME=data_services
       - CASSANDRA_DC=datacenter1
       - CASSANDRA_RACK=rack1
+      - CASSANDRA_ENDPOINT_SNITCH=GossipingPropertyFileSnitch
       - MAX_HEAP_SIZE=512M
       - HEAP_NEWSIZE=100M
     networks:
@@ -19,10 +20,11 @@ services:
     volumes:
       - cassandra_data1:/var/lib/cassandra
     healthcheck:
-      test: ["CMD-SHELL", "nodetool status | grep UN"]
+      test: ["CMD", "cqlsh", "-e", "describe keyspaces"]
       interval: 30s
       timeout: 10s
-      retries: 5
+      retries: 10
+      start_period: 60s
 
   cassandra-node2:
     image: cassandra:latest
@@ -35,6 +37,7 @@ services:
       - CASSANDRA_CLUSTER_NAME=data_services
       - CASSANDRA_DC=datacenter1
       - CASSANDRA_RACK=rack1
+      - CASSANDRA_ENDPOINT_SNITCH=GossipingPropertyFileSnitch
       - MAX_HEAP_SIZE=512M
       - HEAP_NEWSIZE=100M
     networks:
@@ -44,6 +47,12 @@ services:
         condition: service_healthy
     volumes:
       - cassandra_data2:/var/lib/cassandra
+    healthcheck:
+      test: ["CMD", "cqlsh", "-e", "describe keyspaces"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 120s
 
   cassandra-node3:
     image: cassandra:latest
@@ -56,6 +65,7 @@ services:
       - CASSANDRA_CLUSTER_NAME=data_services
       - CASSANDRA_DC=datacenter1
       - CASSANDRA_RACK=rack1
+      - CASSANDRA_ENDPOINT_SNITCH=GossipingPropertyFileSnitch
       - MAX_HEAP_SIZE=512M
       - HEAP_NEWSIZE=100M
     networks:
@@ -63,19 +73,39 @@ services:
     depends_on:
       cassandra-node1:
         condition: service_healthy
+      cassandra-node2:
+        condition: service_healthy
     volumes:
       - cassandra_data3:/var/lib/cassandra
+    healthcheck:
+      test: ["CMD", "cqlsh", "-e", "describe keyspaces"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 180s
 
   cassandra-init:
     image: cassandra:latest
     depends_on:
       cassandra-node1:
         condition: service_healthy
+      cassandra-node2:
+        condition: service_healthy
+      cassandra-node3:
+        condition: service_healthy
     networks:
       - dataservices-network
     volumes:
       - ./init.cql:/init.cql
-    command: /bin/bash -c "cqlsh cassandra-node1 -f /init.cql"
+    command: >
+      bash -c '
+      while ! cqlsh cassandra-node1 -e "describe cluster" ; do
+        echo "Waiting for Cassandra cluster to be ready...";
+        sleep 10;
+      done;
+      echo "Initializing database...";
+      cqlsh cassandra-node1 -f /init.cql;
+      '
     restart: on-failure
 
   data-service1:
@@ -87,10 +117,16 @@ services:
     networks:
       - dataservices-network
     depends_on:
-      - cassandra-node1
+      cassandra-node1:
+        condition: service_healthy
+      cassandra-node2:
+        condition: service_healthy
+      cassandra-node3:
+        condition: service_healthy
     environment:
       - PORT=50051
-      - CASSANDRA_HOST=cassandra-node1
+      - CASSANDRA_CONTACT_POINTS=cassandra-node1,cassandra-node2,cassandra-node3
+      - CASSANDRA_LOCAL_DC=datacenter1
     restart: always
 
 volumes:
