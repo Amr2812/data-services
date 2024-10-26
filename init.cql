@@ -20,3 +20,5 @@ INSERT INTO messages (channel_id, message_id, author_id, content) VALUES (2, 200
 INSERT INTO messages (channel_id, message_id, author_id, content) VALUES (2, 2004, 6004, 'Just more dummy data.') IF NOT EXISTS;
 INSERT INTO messages (channel_id, message_id, author_id, content) VALUES (3, 3001, 7001, 'Channel 3, starting new batch.') IF NOT EXISTS;
 INSERT INTO messages (channel_id, message_id, author_id, content) VALUES (3, 3002, 7002, 'Another message in channel 3.') IF NOT EXISTS;
+INSERT INTO messages (channel_id, message_id, author_id, content) VALUES (3, 3003, 7003, 'More content in channel 3.') IF NOT EXISTS;
+INSERT INTO messages (channel_id, message_id, author_id, content) VALUES (3, 3004, 7004, 'Last message in channel 3.') IF NOT EXISTS;
