@@ -1,6 +1,6 @@
 # Data Services
 
-A high-performance, distributed data access layer implementing request coalescing and hash-based routing to optimize database access patterns and prevent hot partitions. 
+A high-performance, distributed data access layer implementing request coalescing and hash-based routing to reduce database load and prevent hot partitions. 
 
 ## Overview
 
