@@ -123,8 +123,33 @@ services:
         condition: service_healthy
       cassandra-node3:
         condition: service_healthy
+      cassandra-init:
+        condition: service_completed_successfully
     environment:
       - PORT=50051
+      - CASSANDRA_CONTACT_POINTS=cassandra-node1,cassandra-node2,cassandra-node3
+      - CASSANDRA_LOCAL_DC=datacenter1
+    restart: always
+
+  data-service2:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "50052:50052"
+    networks:
+      - dataservices-network
+    depends_on:
+      cassandra-node1:
+        condition: service_healthy
+      cassandra-node2:
+        condition: service_healthy
+      cassandra-node3:
+        condition: service_healthy
+      cassandra-init:
+        condition: service_completed_successfully
+    environment:
+      - PORT=50052
       - CASSANDRA_CONTACT_POINTS=cassandra-node1,cassandra-node2,cassandra-node3
       - CASSANDRA_LOCAL_DC=datacenter1
     restart: always

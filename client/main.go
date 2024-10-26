@@ -42,7 +42,7 @@ func main() {
 		log.Fatalf("Number of channels must be less than or equal to 20 because there are only 20 unique channels in cassandra")
 	}
 
-	dataServices := []string{"localhost:50051"}
+	dataServices := []string{"localhost:50051", "localhost:50052"}
 	var clients []pb.MessagesServiceClient
 
 	for _, ds := range dataServices {
