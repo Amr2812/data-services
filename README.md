@@ -1,11 +1,13 @@
 # Data Services
 
-A high-performance, distributed data access layer implementing request coalescing and hash-based routing to optimize database access patterns and prevent hot partitions.
+A high-performance, distributed data access layer implementing request coalescing and hash-based routing to optimize database access patterns and prevent hot partitions. 
 
 ## Overview
 
 Data Services is a middleware layer that sits between API servers and Cassandra clusters, providing intelligent request coalescing and load distribution. It's designed to handle high-traffic scenarios efficiently by reducing duplicate database queries and preventing database overload.
 It is inspired by Discord's architecture explained in their blog post: [HOW DISCORD STORES TRILLIONS OF MESSAGES](https://discord.com/blog/how-discord-stores-trillions-of-messages). An example of usecase from Discord is when a big announcement is sent on a large server (Discord group) that notifies @everyone: users are going to open the app and read the same message, sending tons of traffic to the database. This is where request coalescing comes in handy, as it can combine all the requests for the same data into a single database query, reducing the load on the database and preventing hot partitions.
+
+A simpler way of seeing it is: caching with the duration equal to the time spent running the query. No client has to be aware of the coalescing because the max amount of staleness is the same as if each client had run the query themselves. It also doesn't require extra memory, because the query result falls out of scope as soon as it is sent to all waiters.
 
 ### Key Features
 
