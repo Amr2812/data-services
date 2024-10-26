@@ -40,7 +40,7 @@ $ go run ./client -h
 
 Example usage:
 ```
-$ go run client/main.go
+$ go run ./client
 2024/10/26 17:08:11 Unique requests: 20, Total requests: 10000, Total queries executed: 184
 2024/10/26 17:08:11 Average queries per request: 0.0184
 2024/10/26 17:08:11 Saved queries by coalescing: 9816
