@@ -144,6 +144,13 @@ flowchart TB
 3. **Atomic Operations**
    - Used lock-free atomic counters for metrics tracking
 
+4. **WaitGroups**
+   - Used for waiting on multiple goroutines to complete in the CLI client
+
+5. **Context Management**
+   - Used context for request timeouts and cancellation
+
+
 ### gRPC Implementation
 - Defined service interfaces using Protocol Buffers
 - Managed timeout handling using context
