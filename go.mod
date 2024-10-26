@@ -1,4 +1,4 @@
-module github.com/Amr2812/data-services
+module github.com/amrelmohamady/data-services
 
 go 1.23.1
 

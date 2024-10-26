@@ -8,7 +8,7 @@ import (
 	"sync"
 	"sync/atomic"
 
-	pb "github.com/Amr2812/data-services/messages"
+	pb "github.com/amrelmohamady/data-services/messages"
 	"github.com/gocql/gocql"
 	"google.golang.org/grpc"
 )
@@ -22,7 +22,7 @@ type RequestId struct {
 }
 
 type Metrics struct {
-	totalRequests atomic.Int64
+	totalRequests   atomic.Int64
 	queriesExecuted atomic.Int64
 }
 
@@ -44,13 +44,13 @@ type RequestsMap struct {
 	mu sync.Mutex
 	// channel returns pointer to avoid a lot of copying and it won't be modified by the caller
 	requests map[RequestId][]chan *pb.MessageReply
-	metrics Metrics
+	metrics  Metrics
 }
 
 func NewRequestsMap() *RequestsMap {
 	return &RequestsMap{
 		requests: make(map[RequestId][]chan *pb.MessageReply),
-		metrics: Metrics{},
+		metrics:  Metrics{},
 	}
 }
 
@@ -110,7 +110,7 @@ func (s *MessageService) GetMessage(ctx context.Context, in *pb.MessageRequest) 
 
 func (s *MessageService) GetAndResetMetrics(ctx context.Context, in *pb.Empty) (*pb.MetricsReply, error) {
 	metrics := &pb.MetricsReply{
-		TotalRequests: requestsMap.metrics.totalRequests.Load(),
+		TotalRequests:   requestsMap.metrics.totalRequests.Load(),
 		QueriesExecuted: requestsMap.metrics.queriesExecuted.Load(),
 	}
 	requestsMap.metrics.ResetMetrics()

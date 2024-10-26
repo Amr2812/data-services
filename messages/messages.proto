@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option go_package = "github.com/Amr2812/data-services/messages";
+option go_package = "github.com/amrelmohamady/data-services/messages";
 
 package messages;
 
