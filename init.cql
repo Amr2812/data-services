@@ -10,15 +10,23 @@ CREATE TABLE IF NOT EXISTS messages (
   PRIMARY KEY (channel_id, message_id)
 ) WITH CLUSTERING ORDER BY (message_id DESC);
 
-INSERT INTO messages (channel_id, message_id, author_id, content) VALUES (1, 1001, 5001, 'Hello, this is the first message.') IF NOT EXISTS;
-INSERT INTO messages (channel_id, message_id, author_id, content) VALUES (1, 1002, 5002, 'Here is another message.') IF NOT EXISTS;
-INSERT INTO messages (channel_id, message_id, author_id, content) VALUES (1, 1003, 5003, 'Bulk insert message example.') IF NOT EXISTS;
-INSERT INTO messages (channel_id, message_id, author_id, content) VALUES (1, 1004, 5004, 'Just adding some dummy data.') IF NOT EXISTS;
-INSERT INTO messages (channel_id, message_id, author_id, content) VALUES (2, 2001, 6001, 'Second channel first message.') IF NOT EXISTS;
-INSERT INTO messages (channel_id, message_id, author_id, content) VALUES (2, 2002, 6002, 'More messages in another channel.') IF NOT EXISTS;
-INSERT INTO messages (channel_id, message_id, author_id, content) VALUES (2, 2003, 6003, 'Sample content goes here.') IF NOT EXISTS;
-INSERT INTO messages (channel_id, message_id, author_id, content) VALUES (2, 2004, 6004, 'Just more dummy data.') IF NOT EXISTS;
-INSERT INTO messages (channel_id, message_id, author_id, content) VALUES (3, 3001, 7001, 'Channel 3, starting new batch.') IF NOT EXISTS;
-INSERT INTO messages (channel_id, message_id, author_id, content) VALUES (3, 3002, 7002, 'Another message in channel 3.') IF NOT EXISTS;
-INSERT INTO messages (channel_id, message_id, author_id, content) VALUES (3, 3003, 7003, 'More content in channel 3.') IF NOT EXISTS;
-INSERT INTO messages (channel_id, message_id, author_id, content) VALUES (3, 3004, 7004, 'Last message in channel 3.') IF NOT EXISTS;
+INSERT INTO messages (channel_id, message_id, author_id, content) VALUES (1, 1000, 5000, 'Hello, this is the first message.') IF NOT EXISTS;
+INSERT INTO messages (channel_id, message_id, author_id, content) VALUES (2, 2000, 6000, 'Second channel first message.') IF NOT EXISTS;
+INSERT INTO messages (channel_id, message_id, author_id, content) VALUES (3, 3000, 7000, 'Channel 3000') IF NOT EXISTS;
+INSERT INTO messages (channel_id, message_id, author_id, content) VALUES (4, 4000, 8000, 'Channel 4000') IF NOT EXISTS;
+INSERT INTO messages (channel_id, message_id, author_id, content) VALUES (5, 5000, 9000, 'Channel 5000') IF NOT EXISTS;
+INSERT INTO messages (channel_id, message_id, author_id, content) VALUES (6, 6000, 10000, 'Channel 6000') IF NOT EXISTS;
+INSERT INTO messages (channel_id, message_id, author_id, content) VALUES (7, 7000, 11000, 'Channel 7000') IF NOT EXISTS;
+INSERT INTO messages (channel_id, message_id, author_id, content) VALUES (8, 8000, 12000, 'Channel 8000') IF NOT EXISTS;
+INSERT INTO messages (channel_id, message_id, author_id, content) VALUES (9, 9000, 13000, 'Channel 9000') IF NOT EXISTS;
+INSERT INTO messages (channel_id, message_id, author_id, content) VALUES (10, 10000, 14000, 'Channel 10000') IF NOT EXISTS;
+INSERT INTO messages (channel_id, message_id, author_id, content) VALUES (11, 11000, 15000, 'Channel 11000') IF NOT EXISTS;
+INSERT INTO messages (channel_id, message_id, author_id, content) VALUES (12, 12000, 16000, 'Channel 12000') IF NOT EXISTS;
+INSERT INTO messages (channel_id, message_id, author_id, content) VALUES (13, 13000, 17000, 'Channel 13000') IF NOT EXISTS;
+INSERT INTO messages (channel_id, message_id, author_id, content) VALUES (14, 14000, 18000, 'Channel 14000') IF NOT EXISTS;
+INSERT INTO messages (channel_id, message_id, author_id, content) VALUES (15, 15000, 19000, 'Channel 15000') IF NOT EXISTS;
+INSERT INTO messages (channel_id, message_id, author_id, content) VALUES (16, 16000, 20000, 'Channel 16000') IF NOT EXISTS;
+INSERT INTO messages (channel_id, message_id, author_id, content) VALUES (17, 17000, 21000, 'Channel 17000') IF NOT EXISTS;
+INSERT INTO messages (channel_id, message_id, author_id, content) VALUES (18, 18000, 22000, 'Channel 18000') IF NOT EXISTS;
+INSERT INTO messages (channel_id, message_id, author_id, content) VALUES (19, 19000, 23000, 'Channel 19000') IF NOT EXISTS;
+INSERT INTO messages (channel_id, message_id, author_id, content) VALUES (20, 20000, 24000, 'Channel 20000') IF NOT EXISTS;

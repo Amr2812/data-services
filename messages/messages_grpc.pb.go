@@ -19,7 +19,8 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	MessagesService_GetMessage_FullMethodName = "/messages.MessagesService/getMessage"
+	MessagesService_GetMessage_FullMethodName         = "/messages.MessagesService/getMessage"
+	MessagesService_GetAndResetMetrics_FullMethodName = "/messages.MessagesService/getAndResetMetrics"
 )
 
 // MessagesServiceClient is the client API for MessagesService service.
@@ -27,6 +28,7 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type MessagesServiceClient interface {
 	GetMessage(ctx context.Context, in *MessageRequest, opts ...grpc.CallOption) (*MessageReply, error)
+	GetAndResetMetrics(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*MetricsReply, error)
 }
 
 type messagesServiceClient struct {
@@ -47,11 +49,22 @@ func (c *messagesServiceClient) GetMessage(ctx context.Context, in *MessageReque
 	return out, nil
 }
 
+func (c *messagesServiceClient) GetAndResetMetrics(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*MetricsReply, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(MetricsReply)
+	err := c.cc.Invoke(ctx, MessagesService_GetAndResetMetrics_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // MessagesServiceServer is the server API for MessagesService service.
 // All implementations must embed UnimplementedMessagesServiceServer
 // for forward compatibility.
 type MessagesServiceServer interface {
 	GetMessage(context.Context, *MessageRequest) (*MessageReply, error)
+	GetAndResetMetrics(context.Context, *Empty) (*MetricsReply, error)
 	mustEmbedUnimplementedMessagesServiceServer()
 }
 
@@ -64,6 +77,9 @@ type UnimplementedMessagesServiceServer struct{}
 
 func (UnimplementedMessagesServiceServer) GetMessage(context.Context, *MessageRequest) (*MessageReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetMessage not implemented")
+}
+func (UnimplementedMessagesServiceServer) GetAndResetMetrics(context.Context, *Empty) (*MetricsReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetAndResetMetrics not implemented")
 }
 func (UnimplementedMessagesServiceServer) mustEmbedUnimplementedMessagesServiceServer() {}
 func (UnimplementedMessagesServiceServer) testEmbeddedByValue()                         {}
@@ -104,6 +120,24 @@ func _MessagesService_GetMessage_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
+func _MessagesService_GetAndResetMetrics_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MessagesServiceServer).GetAndResetMetrics(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: MessagesService_GetAndResetMetrics_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MessagesServiceServer).GetAndResetMetrics(ctx, req.(*Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // MessagesService_ServiceDesc is the grpc.ServiceDesc for MessagesService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -114,6 +148,10 @@ var MessagesService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "getMessage",
 			Handler:    _MessagesService_GetMessage_Handler,
+		},
+		{
+			MethodName: "getAndResetMetrics",
+			Handler:    _MessagesService_GetAndResetMetrics_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

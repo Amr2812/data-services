@@ -6,6 +6,7 @@ package messages;
 
 service MessagesService {
     rpc getMessage (MessageRequest) returns (MessageReply);
+    rpc getAndResetMetrics (Empty) returns (MetricsReply);
 }
 
 message MessageRequest {
@@ -19,3 +20,10 @@ message MessageReply {
     int64 author_id = 3;
     string content = 4;
 }
+
+message MetricsReply {
+    int64 total_requests = 1;
+    int64 queries_executed = 2;
+}
+
+message Empty {}

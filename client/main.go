@@ -4,7 +4,7 @@ import (
 	"context"
 	"flag"
 	"log"
-	"math/rand"
+	"strconv"
 	"sync"
 	"time"
 
@@ -18,7 +18,7 @@ func sendRequest(client pb.MessagesServiceClient, channelId int64, wg *sync.Wait
 
 	message := &pb.MessageRequest{
 		ChannelId: channelId,
-		MessageId: channelId*1000 + int64(rand.Intn(4)+1),
+		MessageId: channelId*1000,
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -32,9 +32,15 @@ func sendRequest(client pb.MessagesServiceClient, channelId int64, wg *sync.Wait
 }
 
 func main() {
-	requests := flag.Int("requests", 1000, "Total number of requests to send")
-	numChannels := flag.Int("channels", 3, "Number of unique channels to distribute requests across")
+	requests := flag.Int("requests", 10000, "Total number of requests to send")
+	numChannels := flag.Int("channels", 20, "Number of unique channels to distribute requests across")
 	flag.Parse()
+	if (*requests <= 0) || (*numChannels <= 0) {
+		log.Fatalf("Invalid requests or channels, must be greater than 0")
+	}
+	if *numChannels > 20 {
+		log.Fatalf("Number of channels must be less than or equal to 20 because there are only 20 unique channels in cassandra")
+	}
 
 	dataServices := []string{"localhost:50051"}
 	var clients []pb.MessagesServiceClient
@@ -61,5 +67,29 @@ func main() {
 
 	wg.Wait()
 	elapsed := time.Since(start)
-	log.Printf("Completed %d requests for %d channels in %v", *requests, *numChannels, elapsed)
+
+	var metrics []*pb.MetricsReply
+	for _, client := range clients {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+
+		metricsReply, err := client.GetAndResetMetrics(ctx, &pb.Empty{})
+		if err != nil {
+			log.Fatalf("Failed to get metrics: %v", err)
+		}
+		metrics = append(metrics, metricsReply)
+	}
+
+	totalRequests := 0
+	queriesExecuted := 0
+	for _, m := range metrics {
+		totalRequests += int(m.TotalRequests)
+		queriesExecuted += int(m.QueriesExecuted)
+	}
+	avgQueries := strconv.FormatFloat(float64(queriesExecuted)/float64(totalRequests), 'f', -1, 64)
+
+	log.Printf("Total requests: %d, Total queries executed: %d", totalRequests, queriesExecuted)
+	log.Printf("Average queries per request: %s", avgQueries)
+	log.Printf("Saved queries by coalescing: %d", totalRequests-queriesExecuted)
+	log.Printf("Total time taken: %v", elapsed)
 }

@@ -6,6 +6,7 @@ import (
 	"net"
 	"os"
 	"sync"
+	"sync/atomic"
 
 	pb "github.com/Amr2812/data-services/messages"
 	"github.com/gocql/gocql"
@@ -20,20 +21,41 @@ type RequestId struct {
 	messageId int64
 }
 
+type Metrics struct {
+	totalRequests atomic.Int64
+	queriesExecuted atomic.Int64
+}
+
+func (m *Metrics) AddRequest() {
+	m.totalRequests.Add(1)
+}
+
+func (m *Metrics) AddQuery() {
+	m.queriesExecuted.Add(1)
+}
+
+func (m *Metrics) ResetMetrics() {
+	m.totalRequests.Store(0)
+	m.queriesExecuted.Store(0)
+}
+
 // map of request ids to array of channels
 type RequestsMap struct {
 	mu sync.Mutex
 	// channel returns pointer to avoid a lot of copying and it won't be modified by the caller
 	requests map[RequestId][]chan *pb.MessageReply
+	metrics Metrics
 }
 
 func NewRequestsMap() *RequestsMap {
 	return &RequestsMap{
 		requests: make(map[RequestId][]chan *pb.MessageReply),
+		metrics: Metrics{},
 	}
 }
 
 func (rm *RequestsMap) HandleRequest(requestId RequestId) *pb.MessageReply {
+	rm.metrics.AddRequest()
 	resultChan := make(chan *pb.MessageReply)
 	rm.mu.Lock()
 
@@ -44,6 +66,7 @@ func (rm *RequestsMap) HandleRequest(requestId RequestId) *pb.MessageReply {
 		rm.requests[requestId] = channels
 		rm.mu.Unlock()
 
+		rm.metrics.AddQuery()
 		go rm.ExecuteQuery(requestId)
 	} else {
 		channels = append(channels, resultChan)
@@ -71,7 +94,6 @@ func (rm *RequestsMap) ExecuteQuery(requestId RequestId) {
 	delete(rm.requests, requestId)
 	rm.mu.Unlock()
 
-	log.Printf("Sending result to %d channels", len(channels))
 	for _, ch := range channels {
 		ch <- &MessageReply
 	}
@@ -84,6 +106,16 @@ type MessageService struct {
 func (s *MessageService) GetMessage(ctx context.Context, in *pb.MessageRequest) (*pb.MessageReply, error) {
 	requestId := RequestId{channelId: in.ChannelId, messageId: in.MessageId}
 	return requestsMap.HandleRequest(requestId), nil
+}
+
+func (s *MessageService) GetAndResetMetrics(ctx context.Context, in *pb.Empty) (*pb.MetricsReply, error) {
+	metrics := &pb.MetricsReply{
+		TotalRequests: requestsMap.metrics.totalRequests.Load(),
+		QueriesExecuted: requestsMap.metrics.queriesExecuted.Load(),
+	}
+	requestsMap.metrics.ResetMetrics()
+
+	return metrics, nil
 }
 
 func main() {
