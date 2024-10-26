@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	pb "github.com/amrelmohamady/data-services/messages"
+	pb "github.com/amrdb/data-services/messages"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )

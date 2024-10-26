@@ -8,7 +8,7 @@ import (
 	"sync"
 	"sync/atomic"
 
-	pb "github.com/amrelmohamady/data-services/messages"
+	pb "github.com/amrdb/data-services/messages"
 	"github.com/gocql/gocql"
 	"google.golang.org/grpc"
 )
