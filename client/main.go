@@ -21,7 +21,7 @@ func sendRequest(client pb.MessagesServiceClient, channelId int64, wg *sync.Wait
 		MessageId: channelId * 1000,
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	_, err := client.GetMessage(ctx, message)
@@ -73,7 +73,7 @@ func main() {
 
 	var metrics []*pb.MetricsReply
 	for _, client := range clients {
-		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
 
 		metricsReply, err := client.GetAndResetMetrics(ctx, &pb.Empty{})

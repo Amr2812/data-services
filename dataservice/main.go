@@ -26,25 +26,12 @@ type Metrics struct {
 	queriesExecuted atomic.Int64
 }
 
-func (m *Metrics) AddRequest() {
-	m.totalRequests.Add(1)
-}
-
-func (m *Metrics) AddQuery() {
-	m.queriesExecuted.Add(1)
-}
-
-func (m *Metrics) ResetMetrics() {
-	m.totalRequests.Store(0)
-	m.queriesExecuted.Store(0)
-}
-
 // map of request ids to array of channels
 type RequestsMap struct {
 	mu sync.Mutex
 	// channel returns pointer to avoid a lot of copying and it won't be modified by the caller
 	requests map[RequestId][]chan *pb.MessageReply
-	metrics  Metrics
+	metrics  Metrics // atomic counters (not guarded by mutex)
 }
 
 func NewRequestsMap() *RequestsMap {
@@ -55,7 +42,7 @@ func NewRequestsMap() *RequestsMap {
 }
 
 func (rm *RequestsMap) HandleRequest(requestId RequestId) *pb.MessageReply {
-	rm.metrics.AddRequest()
+	rm.metrics.totalRequests.Add(1)
 	resultChan := make(chan *pb.MessageReply)
 	rm.mu.Lock()
 
@@ -66,7 +53,7 @@ func (rm *RequestsMap) HandleRequest(requestId RequestId) *pb.MessageReply {
 		rm.requests[requestId] = channels
 		rm.mu.Unlock()
 
-		rm.metrics.AddQuery()
+		rm.metrics.queriesExecuted.Add(1)
 		go rm.ExecuteQuery(requestId)
 	} else {
 		channels = append(channels, resultChan)
@@ -113,7 +100,8 @@ func (s *MessageService) GetAndResetMetrics(ctx context.Context, in *pb.Empty) (
 		TotalRequests:   requestsMap.metrics.totalRequests.Load(),
 		QueriesExecuted: requestsMap.metrics.queriesExecuted.Load(),
 	}
-	requestsMap.metrics.ResetMetrics()
+	requestsMap.metrics.queriesExecuted.Store(0)
+	requestsMap.metrics.totalRequests.Store(0)
 
 	return metrics, nil
 }
